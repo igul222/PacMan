@@ -24,7 +24,7 @@ public class Window extends JFrame implements KeyListener {
 
         textArea = new JTextArea();
         textArea.setSize(300, 300);
-        textArea.setFont(new Font("Courier New", Font.BOLD, 12));
+        textArea.setFont(new Font("Courier New", Font.BOLD, 14));
         getContentPane().add(textArea);
         
         // Change textArea to a more appropriate size.
@@ -69,7 +69,7 @@ public class Window extends JFrame implements KeyListener {
                         textArea.setText(game.render());
                     }
                 };
-                new Timer(100, stepGameAction).start();
+                new Timer(300, stepGameAction).start();
             }
 
             // Recenter the text area when the window changes size.

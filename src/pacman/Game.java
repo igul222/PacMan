@@ -29,7 +29,9 @@ public class Game {
 
        // ... and now, on to the ghosts. We'll use a simple AI strategy in which
        // each ghost acts independently (they don't collaborate) and moves in
-       // Pac-Man's approximate direction.
+       // Pac-Man's approximate direction. There are *a lot* of problems with
+       // this approach, as I'm sure you'll discover eventually, but for now
+       // we'll use it because it's simple.
 
        // More on this line later.
        ArrayList<Point> movedGhosts = new ArrayList<Point>();
@@ -39,7 +41,8 @@ public class Game {
                if(movedGhosts.indexOf(new Point(x,y)) != -1)
                    continue; // We've already moved a ghost to this point.
 
-               if(board.getThingAt(x, y)=='*') {
+               char thing = board.getThingAt(x, y);
+               if(thing=='8'||thing=='%') {
                    // There's a ghost at (x,y). Let's figure out where to move
                    // him and do it.
 
@@ -55,7 +58,7 @@ public class Game {
                        Point move = possibleMoves[i];
                        int newX = x + move.x;
                        int newY = y + move.y;
-                       char thing = board.getThingAt(newX, newY);
+                       char thingAtNewPos = board.getThingAt(newX, newY);
 
                        if(board.isPacManAt(newX, newY)) {
                            // This move takes our ghost to Pac-Man, therefore
@@ -64,7 +67,7 @@ public class Game {
                            break;
                        }
 
-                       if(thing != ' ' && thing != '.') {
+                       if(thingAtNewPos != ' ' && thingAtNewPos != '.') {
                            // The space in this direction is occupied; it isn't
                            // a valid move. Skip it.
                            // In case you've forgotten, "continue" skips to the

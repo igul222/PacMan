@@ -17,6 +17,7 @@ public class Board {
     public static final Point RIGHT = new Point(1,0);
     private boolean gameOver;
     private int maxYCoord = -1;
+    private int score = 0;
     
     public Board() {
         // Initialize the 'gameOver' variable.
@@ -49,6 +50,11 @@ public class Board {
         }
 
         char[][] result = new char[maxLineLength][lines.length];
+        for(int i=0;i<result.length;i++) {
+            for(int k=0;k<result[i].length;k++) {
+                result[i][k] = ' ';
+            }
+        }
 
         for(int i=0;i<lines.length;i++) {
             for(int k=0;k<lines[i].length();k++) {
@@ -88,7 +94,7 @@ public class Board {
     // Return a text-based "picture" of what the board looks like.
     public String render() {
         if(gameOver)
-            return "GAME OVER!";
+            return ("GAME OVER! SCORE: "+score);
 
         // Since our internal representation of the game board, the 'board'
         // variable, is already pretty good looking, we'll just turn it into
@@ -124,26 +130,45 @@ public class Board {
 
         if(thingAtNewPosition!=' ' && thingAtNewPosition!='.') {
             // Our thing has bumped into something. Silly thing!
-            if(isPacManAt(x,y) && thingAtNewPosition=='*') {
+            if(isPacManAt(x,y) && (thingAtNewPosition=='8'||thingAtNewPosition=='%')) {
                 // Our Pac-Man has bumped into a ghost; whoops!
                 gameOver = true;
-            } else if(thing=='*' && isPacManAt(newX,newY)) {
+            } else if((thing=='8'||thing=='%') && isPacManAt(newX,newY)) {
                 // Our ghost has bumped into a Pac-Man, ouch!
                 gameOver = true;
             }
             return;
         }
 
-        setThingAt(newX,newY,thing);
-        setThingAt(x,y,' ');
+        if(isPacManAt(x,y) && thingAtNewPosition=='.') {
+            // Our Pac-Man has eaten a little point thing!
+            score++;
+        }
+
+        if((thing=='%'||thing=='8')) {
+            if(thingAtNewPosition=='.')
+                setThingAt(newX,newY,'%');
+            else
+                setThingAt(newX,newY,'8');
+        } else
+            setThingAt(newX,newY,thing);
+        if(thing=='%')
+            setThingAt(x,y,'.');
+        else
+            setThingAt(x,y,' ');
     }
 
+    // Return the width of the board.
     public int maxX() {
         return board.length;
     }
 
+    // Return the height of the board. Because this involves a bit of
+    // computation, and the result doesn't change, and the method might be
+    // called hundreds of times per second, we save the result in a variable
+    // to avoid slowing the game down.
     public int maxY() {
-        if(maxYCoord > -1)
+        if(maxYCoord > -1) // -1 means "not calculated yet"
             return maxYCoord;
 
         for(int i=0;i<board.length;i++) {

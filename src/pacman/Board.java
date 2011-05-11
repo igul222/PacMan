@@ -16,6 +16,7 @@ public class Board {
     public static final Point LEFT = new Point(-1,0);
     public static final Point RIGHT = new Point(1,0);
     private boolean gameOver;
+    private int maxYCoord = -1;
     
     public Board() {
         // Initialize the 'gameOver' variable.
@@ -126,6 +127,9 @@ public class Board {
             if(isPacManAt(x,y) && thingAtNewPosition=='*') {
                 // Our Pac-Man has bumped into a ghost; whoops!
                 gameOver = true;
+            } else if(thing=='*' && isPacManAt(newX,newY)) {
+                // Our ghost has bumped into a Pac-Man, ouch!
+                gameOver = true;
             }
             return;
         }
@@ -134,13 +138,28 @@ public class Board {
         setThingAt(x,y,' ');
     }
 
+    public int maxX() {
+        return board.length;
+    }
+
+    public int maxY() {
+        if(maxYCoord > -1)
+            return maxYCoord;
+
+        for(int i=0;i<board.length;i++) {
+            if(maxYCoord < board[i].length)
+                maxYCoord = board[i].length;
+        }
+        return maxYCoord;
+    }
+
     // Return whatever there is at the given coordinates. Encapsulation, see?
     public char getThingAt(int x, int y) {
         return board[x][y];
     }
 
     // Change the thing at the given coordinates to the other thing.
-    private void setThingAt(int x, int y, char thing) {
+    public void setThingAt(int x, int y, char thing) {
         board[x][y] = thing;
     }
 

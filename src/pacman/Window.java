@@ -5,9 +5,11 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import javax.swing.*;
 
-public class Window extends JFrame {
+public class Window extends JFrame implements KeyListener {
     JTextArea textArea;
     Game game;
 
@@ -36,6 +38,11 @@ public class Window extends JFrame {
         // so we'll make it un-editable:
         textArea.setEditable(false);
 
+        // This prevents text selection, but has the unfortunate side effect
+        // of making the text color 50% darker. Not a big deal for me, but
+        // it might be for you. Just saying, y'know?
+        textArea.setEnabled(false);
+
         // A little bit of visual polish- black on black makes the
         // textbox appear invisible, creating the illusion that it isn't there.
         // Feel free to customize as desired.
@@ -62,7 +69,7 @@ public class Window extends JFrame {
                         textArea.setText(game.render());
                     }
                 };
-                new Timer(500, stepGameAction).start();
+                new Timer(100, stepGameAction).start();
             }
 
             // Recenter the text area when the window changes size.
@@ -78,6 +85,16 @@ public class Window extends JFrame {
                 // do nothing
             }
         });
+
+        // The last thing we need to do here is set up a mechanism for listening
+        // to the keys the user presses and forwarding them along to our Game
+        // class. We'll implement the methods of the KeyListener interface
+        // in this class, and then "register" this class as a key listener for
+        // itself and the text area. If a user types a key with this window
+        // selected, or with the text field selected, these methods will be
+        // triggered and we can forward the message along. Ready? Here we go.
+        textArea.addKeyListener(this);
+        this.addKeyListener(this);
     }
 
     // centers the text area within the window
@@ -91,4 +108,24 @@ public class Window extends JFrame {
                 );
     }
 
+    public void keyPressed(KeyEvent ke) {
+        if(ke.getKeyCode() == KeyEvent.VK_RIGHT)
+            game.keyPressed(Board.RIGHT);
+        else if(ke.getKeyCode() == KeyEvent.VK_LEFT)
+            game.keyPressed(Board.LEFT);
+        else if(ke.getKeyCode() == KeyEvent.VK_DOWN)
+            game.keyPressed(Board.DOWN);
+        else if(ke.getKeyCode() == KeyEvent.VK_UP)
+            game.keyPressed(Board.UP);
+    }
+
+    public void keyTyped(KeyEvent ke) {
+        // required for the KeyListener interface, but we don't really have anything
+        // to do here, so do nothing.
+    }
+
+    public void keyReleased(KeyEvent ke) {
+        // required for the KeyListener interface, but we don't really have anything
+        // to do here, so do nothing.
+    }
 }

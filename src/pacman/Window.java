@@ -27,8 +27,8 @@ public class Window extends JFrame {
         
         // Change textArea to a more appropriate size.
         char[][] board = Board.getNewBoard();
-        textArea.setRows(board.length);
-        textArea.setColumns(board[0].length);
+        textArea.setRows(board[0].length);
+        textArea.setColumns(board.length);
         textArea.setSize(textArea.getPreferredSize());
 
         // The point of this text area is just to show stuff to the user;

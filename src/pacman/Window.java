@@ -2,16 +2,18 @@ package pacman;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import javax.swing.*;
 
 public class Window extends JFrame {
     JTextArea textArea;
+    Game game;
 
     public Window() {
         setTitle("Pacman");
-        setSize(400,400);
+        setSize(500,500);
         setLocationRelativeTo(null); // This centers the window on the screen.
         setDefaultCloseOperation(EXIT_ON_CLOSE); // Quit app when window closes.
 
@@ -22,6 +24,12 @@ public class Window extends JFrame {
         textArea.setSize(300, 300);
         textArea.setFont(new Font("Courier New", Font.BOLD, 12));
         getContentPane().add(textArea);
+        
+        // Change textArea to a more appropriate size.
+        char[][] board = Board.getNewBoard();
+        textArea.setRows(board.length);
+        textArea.setColumns(board[0].length);
+        textArea.setSize(textArea.getPreferredSize());
 
         // The point of this text area is just to show stuff to the user;
         // we don't actually want them to edit it like a real text box,
@@ -35,18 +43,29 @@ public class Window extends JFrame {
         textArea.setBackground(Color.BLACK);
         textArea.setForeground(Color.WHITE);
 
-        // This will get replaced in another method when our game loads:
+        // This will get replaced eventually when our game loads:
         textArea.setText("Loading....");
 
         // Syntax gets confusing here- follow carefully.
         this.addComponentListener(new ComponentListener() {
 
-            // Center the text area when the window appears
             public void componentShown(ComponentEvent ce) {
+                // Center the text area when the window appears.
                 centerTextArea();
+
+                // This is where the game starts! Create a Game object and
+                // start "playing" it. Pay attention here- syntax gets tricky.
+                game = new Game();
+                Action stepGameAction = new AbstractAction() {
+                    public void actionPerformed(ActionEvent e) {
+                        game.step();
+                        textArea.setText(game.render());
+                    }
+                };
+                new Timer(500, stepGameAction).start();
             }
 
-            // (re)center the text area when the window changes size
+            // Recenter the text area when the window changes size.
             public void componentResized(ComponentEvent ce) {
                 centerTextArea();
             }

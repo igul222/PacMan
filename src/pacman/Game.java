@@ -4,10 +4,13 @@ import java.awt.Point;
 import java.util.ArrayList;
 
 public class Game {
+
     private Board board;
     private Point pacManDirection;
+    private int steps; // counts how many steps have progressed in the game.
 
     public Game() {
+        steps = 0;
         board = new Board();
         pacManDirection = getPacManDirection();
     }
@@ -24,86 +27,56 @@ public class Game {
     // if necessary, etc. Don't worry much about enforcing rules- that's the
     // Board's job.
     public void step() {
-       Point pacManLoc = board.getPacManLocation();
-       board.move(pacManLoc.x,pacManLoc.y,pacManDirection);
+        steps++;
 
-       // ... and now, on to the ghosts. We'll use a simple AI strategy in which
-       // each ghost acts independently (they don't collaborate) and moves in
-       // Pac-Man's approximate direction. There are *a lot* of problems with
-       // this approach, as I'm sure you'll discover eventually, but for now
-       // we'll use it because it's simple.
+        Point pacManLoc = board.getPacManLocation();
+        board.move(pacManLoc.x, pacManLoc.y, pacManDirection);
 
-       // More on this line later.
-       ArrayList<Point> movedGhosts = new ArrayList<Point>();
-       
-       for(int x=0;x<board.maxX();x++) {
-           for(int y=0;y<board.maxY();y++) {
-               if(movedGhosts.indexOf(new Point(x,y)) != -1)
-                   continue; // We've already moved a ghost to this point.
 
-               char thing = board.getThingAt(x, y);
-               if(thing=='8'||thing=='%') {
-                   // There's a ghost at (x,y). Let's figure out where to move
-                   // him and do it.
+        // ... and now, on to the ghosts. We'll leave the actual AI work to a
+        // separate method in any class implementing the AI interface, focusing
+        // instead only on handling and applying that method to the ghosts here.
 
-                   // Step 1: find all possible valid moves for this ghost.
-                   Point[] possibleMoves =
-                            {Board.UP,
-                             Board.DOWN,
-                             Board.LEFT,
-                             Board.RIGHT};
-                   int bestMove = -1;
-                   double bestMoveDistance = 99999;
-                   for(int i=0;i<possibleMoves.length;i++) {
-                       Point move = possibleMoves[i];
-                       int newX = x + move.x;
-                       int newY = y + move.y;
-                       char thingAtNewPos = board.getThingAt(newX, newY);
 
-                       if(board.isPacManAt(newX, newY)) {
-                           // This move takes our ghost to Pac-Man, therefore
-                           // it's clearly the best possible move. Let's do it.
-                           bestMove = i;
-                           break;
-                       }
+        // Changing the line below lets you use different AI classes.
+        AI ai = new AStarAI();
 
-                       if(thingAtNewPos != ' ' && thingAtNewPos != '.') {
-                           // The space in this direction is occupied; it isn't
-                           // a valid move. Skip it.
-                           // In case you've forgotten, "continue" skips to the
-                           // next iteration of the for-loop.
-                           continue;
-                       }
+        // Note: We want to give the human player a solid head start, so we
+        // won't even move the AI until at least 15 steps in.
 
-                       // Calculate the distance between the ghost and Pac-Man,
-                       // assuming he makes this move. Distance formula:
-                       double dist = Math.sqrt(
-                               (newX-pacManLoc.x)*(newX-pacManLoc.x)+
-                               (newY-pacManLoc.y)*(newY-pacManLoc.y));
-                       if(dist < bestMoveDistance) {
-                           bestMove = i;
-                           bestMoveDistance = dist;
-                       }
-                   }
+        if (steps >= 15) {
 
-                   // Execute the move.
-                   if(bestMove == -1) {
-                       // no legal moves, so let's not do anything.
-                   } else {
-                       board.move(x, y, possibleMoves[bestMove]);
-                   }
+            // Loop through each space on the board:
+            for (int x = 0; x < board.width(); x++) {
+                for (int y = 0; y < board.height(); y++) {
 
-                   // One last thing: because we've just moved a ghost, and
-                   // we're looping through the coordinates to find ghosts
-                   // to move right now, we need to make sure we don't move
-                   // this ghost twice. To do this, we'll add its new location
-                   // to a list of locations to skip in the loop.
-                   movedGhosts.add(new Point(
-                           x+possibleMoves[bestMove].x,
-                           y+possibleMoves[bestMove].y));
-               }
-           }
-       }
+                    // Check if the space is a ghost:
+                    char thing = board.getThingAt(x, y);
+                    if (thing == '8' || thing == '%') {
+                        // Yup, ghost! Actually call the AI and perform the move:
+                        ai.performMoveOnBoard(x, y, board);
+                        // Note that the line above will actually replace the ghost
+                        // character on the board with either "m" or "M",
+                        // ("moved ghost")- this is to prevent the nested for-loop
+                        // we're in from getting confused and picking up the same
+                        // ghost twice.
+                    }
+                }
+            }
+
+            // Now we have a board with a bunch of ms and Ms. Let's change those back
+            // to the usual 8s and %s, eh?
+            for (int x = 0; x < board.width(); x++) {
+                for (int y = 0; y < board.height(); y++) {
+                    char thing = board.getThingAt(x, y);
+                    if (thing == 'm') {
+                        board.setThingAt(x, y, '8');
+                    } else if (thing == 'M') {
+                        board.setThingAt(x, y, '%');
+                    }
+                }
+            }
+        }
     }
 
     // A key corresponding to one of the Board directions (left/right/up/down)
@@ -111,26 +84,28 @@ public class Game {
     public void keyPressed(Point direction) {
         pacManDirection = direction;
         Point loc = board.getPacManLocation();
-        if(direction==Board.LEFT)
+        if (direction == Board.LEFT) {
             board.setThingAt(loc.x, loc.y, '>');
-        else if(direction==Board.RIGHT)
+        } else if (direction == Board.RIGHT) {
             board.setThingAt(loc.x, loc.y, '<');
-        else if(direction==Board.UP)
+        } else if (direction == Board.UP) {
             board.setThingAt(loc.x, loc.y, 'v');
-        else if(direction==Board.DOWN)
+        } else if (direction == Board.DOWN) {
             board.setThingAt(loc.x, loc.y, 'ʌ');
+        }
     }
 
     private Point getPacManDirection() {
         Point pacManLoc = board.getPacManLocation();
-        char pacMan = board.getThingAt(pacManLoc.x,pacManLoc.y);
-        if(pacMan=='<')
+        char pacMan = board.getThingAt(pacManLoc.x, pacManLoc.y);
+        if (pacMan == '<') {
             return Board.RIGHT;
-        else if(pacMan=='>')
+        } else if (pacMan == '>') {
             return Board.LEFT;
-        else if(pacMan=='v')
+        } else if (pacMan == 'v') {
             return Board.UP;
-        else
+        } else {
             return Board.DOWN;
+        }
     }
 }

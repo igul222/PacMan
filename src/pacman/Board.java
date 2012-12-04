@@ -159,7 +159,7 @@ public class Board {
     }
 
     // Return the width of the board.
-    public int maxX() {
+    public int width() {
         return board.length;
     }
 
@@ -167,7 +167,7 @@ public class Board {
     // computation, and the result doesn't change, and the method might be
     // called hundreds of times per second, we save the result in a variable
     // to avoid slowing the game down.
-    public int maxY() {
+    public int height() {
         if(maxYCoord > -1) // -1 means "not calculated yet"
             return maxYCoord;
 

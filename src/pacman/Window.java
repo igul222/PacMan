@@ -69,7 +69,7 @@ public class Window extends JFrame implements KeyListener {
                         textArea.setText(game.render());
                     }
                 };
-                new Timer(300, stepGameAction).start();
+                new Timer(200, stepGameAction).start();
             }
 
             // Recenter the text area when the window changes size.
